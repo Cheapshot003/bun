@@ -11,7 +11,7 @@ const constants = {
   SQLITE_OPEN_CREATE: 0x00000004 /* Ok for sqlite3_open_v2() */,
   SQLITE_OPEN_DELETEONCLOSE: 0x00000008 /* VFS only */,
   SQLITE_OPEN_EXCLUSIVE: 0x00000010 /* VFS only */,
-  SQLITE_OPEN_AUTOPROXY: 0x00000020 /* VFS onlzy */,
+  SQLITE_OPEN_AUTOPROXY: 0x00000020 /* VFS only */,
   SQLITE_OPEN_URI: 0x00000040 /* Ok for sqlite3_open_v2() */,
   SQLITE_OPEN_MEMORY: 0x00000080 /* Ok for sqlite3_open_v2() */,
   SQLITE_OPEN_MAIN_DB: 0x00000100 /* VFS only */,
@@ -40,7 +40,6 @@ var controllers;
 class Statement {
   constructor(raw) {
     this.#raw = raw;
-    console.log("Construct")
     switch (raw.paramsCount) {
       case 0: {
         this.get = this.#getNoArgs;
@@ -102,12 +101,10 @@ class Statement {
 
   #runNoArgs() {
     this.#raw.run();
-    console.log("test")
     return (this.#raw.run());
   }
 
   #get(...args) {
-    console.log("GETHERE");
     if (args.length === 0) return this.#getNoArgs();
     var arg0 = args[0];
     // ["foo"] => ["foo"]
@@ -144,10 +141,8 @@ class Statement {
   }
 
   #run(...args) {
-    console.log("RUNHERE");
     if (args.length === 0) {
       this.#runNoArgs();
-      return ("LOL")
     }
 
     var arg0 = args[0];
@@ -285,12 +280,9 @@ class Database {
   }
 
   run(query, ...params) {
-    console.log("RUN1")
     if (params.length === 0) {
       SQL.run(this.#handle, query);
-      console.log("RUNNNN")
-      var num_rows = SQL.changes(this.#handle)
-      return (1);
+      return;
     }
 
     var arg0 = params[0];
