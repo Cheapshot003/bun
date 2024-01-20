@@ -1000,11 +1000,11 @@ JSC_DEFINE_HOST_FUNCTION(jsSQLStatementExecuteFunction, (JSC::JSGlobalObject * l
         // sqlite depends on the existence of the most recent statement i don't
         // think that's actually how this works - just being cautious
         sqlite3_finalize(statement);
-        return JSValue::encode(JSC::jsUndefined());
+        return JSValue::encode(jsNumber(5));
     }
 
     sqlite3_finalize(statement);
-    return JSValue::encode(jsUndefined());
+    return JSValue::encode(jsNumber(5));
 }
 
 JSC_DEFINE_HOST_FUNCTION(jsSQLStatementIsInTransactionFunction, (JSC::JSGlobalObject * lexicalGlobalObject, JSC::CallFrame* callFrame))
@@ -1721,10 +1721,9 @@ JSC_DEFINE_HOST_FUNCTION(jsSQLStatementExecuteStatementFunctionRun, (JSC::JSGlob
     JSC::VM& vm = lexicalGlobalObject->vm();
     auto scope = DECLARE_THROW_SCOPE(vm);
     auto castedThis = jsDynamicCast<JSSQLStatement*>(callFrame->thisValue());
-
     CHECK_THIS
-
     auto* stmt = castedThis->stmt;
+    sqlite3* db = sqlite3_db_handle(stmt);
     CHECK_PREPARED
 
     int statusCode = sqlite3_reset(stmt);
@@ -1750,14 +1749,12 @@ JSC_DEFINE_HOST_FUNCTION(jsSQLStatementExecuteStatementFunctionRun, (JSC::JSGlob
     while (status == SQLITE_ROW) {
         status = sqlite3_step(stmt);
     }
-
     if (UNLIKELY(status != SQLITE_DONE && status != SQLITE_OK)) {
         throwException(lexicalGlobalObject, scope, createSQLiteError(lexicalGlobalObject, castedThis->version_db->db));
         sqlite3_reset(stmt);
         return JSValue::encode(jsUndefined());
     }
-
-    RELEASE_AND_RETURN(scope, JSC::JSValue::encode(jsUndefined()));
+    RELEASE_AND_RETURN(scope, JSC::JSValue::encode(jsNumber(sqlite3_changes(db))));
 }
 
 JSC_DEFINE_HOST_FUNCTION(jsSQLStatementToStringFunction, (JSC::JSGlobalObject * lexicalGlobalObject, JSC::CallFrame* callFrame))
